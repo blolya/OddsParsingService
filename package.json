@@ -1,0 +1,22 @@
+{
+  "name": "oddsparsingservice",
+  "version": "1.0.0",
+  "description": "Parsing service for sports bookmakers",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/blolya/OddsParsingService.git"
+  },
+  "keywords": [
+    "banana"
+  ],
+  "author": "b-lolya",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/blolya/OddsParsingService/issues"
+  },
+  "homepage": "https://github.com/blolya/OddsParsingService#readme"
+}
