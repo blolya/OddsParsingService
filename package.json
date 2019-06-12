@@ -4,6 +4,7 @@
   "description": "Parsing service for sports bookmakers",
   "main": "index.js",
   "scripts": {
+    "start": "node ./src/index.js",
     "test": "test"
   },
   "repository": {
@@ -18,5 +19,6 @@
   "bugs": {
     "url": "https://github.com/blolya/OddsParsingService/issues"
   },
-  "homepage": "https://github.com/blolya/OddsParsingService#readme"
+  "homepage": "https://github.com/blolya/OddsParsingService#readme",
+  "dependencies": {}
 }
