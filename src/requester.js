@@ -7,8 +7,7 @@ class Requester extends react.Flowable {
     super();
 
     setInterval(async () => {
-      const response = await fetch(address);
-      this.emit('response', response);
+      this.emit('response', await fetch(address));
     }, timeout);
   }
 }

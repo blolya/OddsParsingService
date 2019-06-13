@@ -3,6 +3,8 @@ const OddsParsingService = require('./OddsParsingService');
 class OlimpOddsParsingService extends OddsParsingService{
   constructor() {
     super();
+    this.sportApiAddress = 'https://api.ruolimp.ru/api/live/sport';
+    this.eventApiAddress = 'https://api.ruolimp.ru/api/live/event';
   }
 
   parseEventsIds(sportPageRawResponse = '') {
@@ -16,10 +18,11 @@ class OlimpOddsParsingService extends OddsParsingService{
     return eventsIdsList;
   }
   parseOdds(eventPageRawResponse = '') {
+    const oddsList = [];
 
     const event = JSON.parse(eventPageRawResponse);
     event.markets.forEach((market) => {
-      this.oddsFlow.emit('newOdds', {
+      oddsList.push({
         "firstTeam": event.name.split(' - ')[0],
         "secondTeam": event.name.split(' - ')[1],
         "sport": event.sportName,
@@ -30,21 +33,22 @@ class OlimpOddsParsingService extends OddsParsingService{
           }
         },
         "kind": {
-          "type": "mainline",
+          "type": market.name,
           "params": {
-            "outcome": "1"
+            "outcome": market.outcomeType
           }
         },
         "bookmaker": "olimp",
-        "value": market.value,
+        "value": +market.value,
         "updated": new Date().toJSON(),
         "extra": {
-          "eventId": 72389,
-          "sportId": 12
+          "eventId": event.id,
+          "sportId": event.sportId
         }
-      } );
-
+      })
     });
+
+    return oddsList;
   }
 }
 
