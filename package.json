@@ -20,5 +20,7 @@
     "url": "https://github.com/blolya/OddsParsingService/issues"
   },
   "homepage": "https://github.com/blolya/OddsParsingService#readme",
-  "dependencies": {}
+  "dependencies": {
+    "ws": "^7.0.0"
+  }
 }

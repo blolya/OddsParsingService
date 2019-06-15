@@ -1,8 +1,8 @@
 const http = require('http');
 const https = require('https');
-const react = require("./react");
+const Flowable = require("./react").Flowable;
 
-class Requester extends react.Flowable {
+class Requester extends Flowable {
   constructor(address = '', timeout = 1000) {
     super();
 

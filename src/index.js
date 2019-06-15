@@ -1,15 +1,14 @@
 'use strict';
 
-const OlimpOddsParsingService = require('./OlimpOddsParsingService');
+const OddsParsingService = require('./OddsParsingService');
+
 
 const main = async () => {
-    const oops = new OlimpOddsParsingService();
-
-    oops.subscribeToSports([3, 5], (oddsFlow) => {
-      oddsFlow.on('newOdds', (odds) => {
-        console.log(odds);
-      })
-    });
+  const OlimpOddsParsingService = new OddsParsingService();
+  OlimpOddsParsingService.subscribeToSports([3]);
+  OlimpOddsParsingService.on('newOdds', (odds) => {
+    console.log(odds);
+  })
 };
 
 main();

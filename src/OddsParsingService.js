@@ -1,49 +1,37 @@
 'use strict';
 
-const EventEmitter = require('events');
-const react = require('./react');
-const rq = require('./requester');
+const Flowable = require('./react').Flowable;
+const RequestSubscriber = require('./subscriber').RequestSubscriber;
 
-class OddsParsingService {
-  constructor() {
-    this.sportsRequesters = new Map();
-    this.liveEventsRequesters = new Map();
-    this.oddsFlow = new react.Flowable();
-
-    this.sportApiAddress = '';
-    this.eventApiAddress = '';
+class OddsParsingService extends Flowable {
+  constructor(props) {
+    super(props);
+    this.sportsSubscribers = new Map();
+    this.liveEventsSubscribers = new Map();
   }
 
-  subscribeToEvents(eventsIdsList = [], callback) {
-    callback(this.oddsFlow);
 
-    eventsIdsList.forEach((eventId) => {
-
-      if (!this.liveEventsRequesters.has(eventId)) {
-        this.liveEventsRequesters[eventId] = new rq.Requester(`${this.eventApiAddress}?id=${eventId}`, 2000);
-        this.liveEventsRequesters[eventId].on('response', async (response) => {
-          const oddsList = this.parseOdds(response);
-          oddsList.forEach((odds) => {
-            this.oddsFlow.emit('newOdds', odds);
-          })
+  subscribeToEvents(eventsIdsList = []) {
+    eventsIdsList.forEach(async (eventId) => {
+      if(!this.liveEventsSubscribers.has(eventId)) {
+        this.liveEventsSubscribers[eventId] = new RequestSubscriber(`https://api.ruolimp.ru/api/live/event?id=${eventId}`, 2000);
+        this.liveEventsSubscribers[eventId].on('response', (rawResponse) => {
+          this.emit('newOdds', rawResponse);
         })
-      } else {
-        console.log((`${eventId} is already in list`));
       }
-
-    });
+    })
   }
 
-  subscribeToSports(sportsIdsList = [], callback) {
-    sportsIdsList.forEach((sportId) => {
-
-      this.sportsRequesters[sportId] = new rq.Requester(`${this.sportApiAddress}?id=${sportId}`);
-      this.sportsRequesters[sportId].on('response', (response) => {
-        const liveEventsIdsList = this.parseEventsIds(response);
-        this.subscribeToEvents(liveEventsIdsList, callback);
+  subscribeToSports(sportsIdsList = []) {
+    sportsIdsList.forEach(async (sportId) => {
+      this.sportsSubscribers[sportId] = new RequestSubscriber(`https://api.ruolimp.ru/api/live/sport?id=${sportId}`, 2000);
+      this.sportsSubscribers[sportId].on('response', (rawResponse) => {
+        const sportEvents = JSON.parse(rawResponse).events;
+        const sportEventsIds = [];
+        sportEvents.forEach((sportEvent) => sportEventsIds.push(sportEvent.id));
+        this.subscribeToEvents(sportEventsIds);
       })
-
-    });
+    })
   }
 
   parseEventsIds(sportPageRawResponse = '') {}
