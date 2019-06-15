@@ -6,9 +6,12 @@ class Requester extends Flowable {
   constructor(address = '', timeout = 1000) {
     super();
 
-    setInterval(async () => {
+    this.interval = setInterval(async () => {
       this.emit('response', await fetch(address));
     }, timeout);
+  }
+  unsubscribe() {
+    clearInterval(this.interval);
   }
 }
 

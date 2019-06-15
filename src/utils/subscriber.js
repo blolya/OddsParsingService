@@ -15,7 +15,7 @@ class Subscriber extends Flowable {
     })
   }
   unsubscribe() {
-    this.connection = {};
+    this.connection.unsubscribe();
   }
 }
 
