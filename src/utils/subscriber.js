@@ -8,7 +8,12 @@ class Subscriber extends Flowable {
     this.subscribe(address, timeout);
   }
 
-  subscribe(address, timeout) {}
+  subscribe(address, timeout) {
+    this.connection = new Flowable();
+    this.connection.on('response', (data) => {
+      this.emit('response', data);
+    })
+  }
   unsubscribe() {
     this.connection = {};
   }

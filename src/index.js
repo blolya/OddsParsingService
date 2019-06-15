@@ -1,12 +1,13 @@
 'use strict';
 
-const OddsParsingService = require('./OddsParsingService');
+const OlimpOddsParsingService = require('./olimp/OlimpOddsParsingService');
+const sports = require('./olimp/olimp').sports;
 
 
 const main = async () => {
-  const OlimpOddsParsingService = new OddsParsingService();
-  OlimpOddsParsingService.subscribeToSports([3]);
-  OlimpOddsParsingService.on('newOdds', (odds) => {
+  const oops = new OlimpOddsParsingService();
+  oops.subscribeToSports([sports.TENNIS]);
+  oops.on('newOdds', (odds) => {
     console.log(odds);
   })
 };
