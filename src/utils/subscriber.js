@@ -36,6 +36,7 @@ class RequestSubscriber extends Flowable {
 
   subscribe(address, timeout) {
     const connectionKey = this.createHash(address);
+
     this.connections[connectionKey] = new Requester(address, timeout);
     this.connections[connectionKey].on('response', (data) => {
       this.emit('response', data);
@@ -43,7 +44,8 @@ class RequestSubscriber extends Flowable {
   }
 
   unsubscribe(address) {
-    this.connections[this.createHash(address)].unsubscribeFromEvent();
+    const connectionKey = this.createHash(address);
+    this.connections[connectionKey].unsubscribe();
   }
 
   createHash(data) {

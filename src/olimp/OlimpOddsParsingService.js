@@ -9,9 +9,13 @@ class OlimpOddsParsingService extends Flowable {
     this.sportApiAddress = api.sport;
     this.eventApiAddress = api.event;
 
+    this.sportsEvents = {};
+    this.events = [];
+
     this.sportsRequester = new RequestSubscriber();
     this.sportsRequester.on('response', (rawSportResponse) => {
-      const eventsIdsList = this.parseSport(rawSportResponse);
+      const {sportId, eventsIdsList} = this.parseSport(rawSportResponse);
+      this.sportsEvents[sportId] = eventsIdsList;
       this.subscribeToEvents(eventsIdsList);
     });
 
@@ -22,7 +26,10 @@ class OlimpOddsParsingService extends Flowable {
   }
 
   subscribeToEvent(eventId, timeout) {
-    this.eventsRequester.subscribe(`${this.eventApiAddress}?id=${eventId}`, timeout);
+    if (!this.events.includes(eventId)) {
+      this.eventsRequester.subscribe(`${this.eventApiAddress}?id=${eventId}`, timeout);
+      this.events.push(eventId);
+    }
   }
   unsubscribeFromEvent(eventId) {
     this.eventsRequester.unsubscribe(`${this.eventApiAddress}?id=${eventId}`);
@@ -32,12 +39,19 @@ class OlimpOddsParsingService extends Flowable {
       this.subscribeToEvent(eventId, timeout);
     })
   }
+  unsubscribeFromEvents(eventsIds = []) {
+    eventsIds.forEach((eventId) => {
+      this.unsubscribeFromEvent(eventId);
+    })
+  }
 
   subscribeToSport(sport, timeout) {
-    console.log(`${this.sportApiAddress}?=${sport}`);
     this.sportsRequester.subscribe(`${this.sportApiAddress}?id=${sport}`, timeout);
   }
-  unsubscribeFromSport(sport, timeout) {
+  unsubscribeFromSport(sport) {
+    this.sportsEvents[sport].forEach((eventId) => {
+      this.unsubscribeFromEvent(eventId);
+    });
     this.sportsRequester.unsubscribe(`${this.sportApiAddress}?id=${sport}`);
   }
   subscribeToSports(sports = [], timeout) {
@@ -45,14 +59,23 @@ class OlimpOddsParsingService extends Flowable {
       this.subscribeToSport(sport, timeout);
     })
   }
+  unsubscribeFromSports(sports = []) {
+    sports.forEach((sport) => {
+      this.unsubscribeFromSport(sport);
+    })
+  }
 
-  parseSport(rawSportResponse) {
+  parseSport(sportResponse) {
     const eventsIdsList = [];
-    const sport = JSON.parse(rawSportResponse);
+    const sport = JSON.parse(sportResponse);
     sport.events.forEach((event) => {
       eventsIdsList.push(event.id);
     });
-    return eventsIdsList;
+
+    return {
+      sportId: sport.sport.id,
+      eventsIdsList: eventsIdsList
+    }
   }
 }
 

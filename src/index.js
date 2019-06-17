@@ -7,10 +7,13 @@ const RequestSubscriber = require('./utils/subscriber').RequestSubscriber;
 
 const main = async () => {
   const oops = new OlimpOddsParsingService();
-  oops.subscribeToSport(3, 1000);
+  oops.subscribeToSports([3], 1000);
   oops.on('newOdds', (odds) => {
     console.log(odds);
   });
+  setTimeout(() => {
+    oops.unsubscribeFromSports([3]);
+  }, 6000);
 };
 
 main();
