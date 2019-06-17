@@ -6,13 +6,11 @@ const RequestSubscriber = require('./utils/subscriber').RequestSubscriber;
 
 
 const main = async () => {
-  const oops = new RequestSubscriber('https://api.ruolimp.ru/api/live/event?id=49623430', 1000);
-  oops.on('response', (odds) => {
+  const oops = new OlimpOddsParsingService();
+  oops.subscribeToSport(3, 1000);
+  oops.on('newOdds', (odds) => {
     console.log(odds);
-  })
-  setTimeout(() => {
-    oops.unsubscribe();
-  }, 3000);
+  });
 };
 
 main();

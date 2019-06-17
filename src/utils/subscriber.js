@@ -1,53 +1,59 @@
 const Flowable = require('./react').Flowable;
 const Requester = require('./requester').Requester;
 const WebSocket = require('ws');
+const crypto = require('crypto');
 
-class Subscriber extends Flowable {
-  constructor(address, timeout) {
-    super();
-    this.subscribe(address, timeout);
-  }
+class WebSocketSubscriber extends Flowable {
+  constructor(address, message) {
+    super(address);
 
-  subscribe(address, timeout) {
-    this.connection = new Flowable();
-    this.connection.on('response', (data) => {
-      this.emit('response', data);
-    })
-  }
-  unsubscribe() {
-    this.connection.unsubscribe();
-  }
-}
+    this.connection = new WebSocket(new URL(address));
 
-class WebSocketSubscriber extends Subscriber {
-  constructor(address, timeout) {
-    super(address, timeout);
-  }
-
-  subscribe(address, timeout) {
-    this.connection = WebSocket(new URL(address));
-    this.connection.on('open', () => console.log(`Websocket connection to ${address} was established`));
+    this.connection.on('open', () => {
+      this.connection.send(message);
+      console.log(`Websocket connection to ${address} was established`)
+    });
     this.connection.on('message', (data) => {
       this.emit('response', data);
     })
   }
+
+  subscribe(message) {
+    this.connection.send(message);
+  }
+  unsubscribe(message) {
+    this.connection.send(message);
+  }
 }
 
-class RequestSubscriber extends Subscriber{
-  constructor(address, timeout) {
-    super(address, timeout);
+class RequestSubscriber extends Flowable {
+  constructor(props) {
+    super(props);
+
+    this.connections = new Map();
+    this.salt = 'OMEGALUL';
   }
 
   subscribe(address, timeout) {
-    this.connection = new Requester(address, timeout);
-    this.connection.on('response', (data) => {
+    const connectionKey = this.createHash(address);
+    this.connections[connectionKey] = new Requester(address, timeout);
+    this.connections[connectionKey].on('response', (data) => {
       this.emit('response', data);
     })
+  }
+
+  unsubscribe(address) {
+    this.connections[this.createHash(address)].unsubscribeFromEvent();
+  }
+
+  createHash(data) {
+    return crypto.createHmac('sha256', this.salt)
+      .update(data)
+      .digest('hex');
   }
 }
 
 module.exports = {
-  Subscriber,
   WebSocketSubscriber,
   RequestSubscriber
 };
