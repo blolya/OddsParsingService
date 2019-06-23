@@ -1,6 +1,6 @@
 const Flowable = require('../utils/react').Flowable;
 const RequestSubscriber = require('../utils/subscriber').RequestSubscriber;
-const api = require('./olimp').api;
+const {Sport, Event, api} = require('./olimp');
 
 class OlimpOddsParsingService extends Flowable {
   constructor(props) {
@@ -9,35 +9,42 @@ class OlimpOddsParsingService extends Flowable {
     this.sportApiAddress = api.sport;
     this.eventApiAddress = api.event;
 
+    this.sports = {};
+
     this.sportsRequester = new RequestSubscriber();
-    this.sportsRequester.on('response', (rawSportResponse) => {
-      const eventsIdsList = this.parseSport(rawSportResponse);
-      this.subscribeToEvents(eventsIdsList);
-    });
-
     this.eventsRequester = new RequestSubscriber();
-    this.eventsRequester.on('response', (rawResponse) => {
-      this.emit('newOdds', rawResponse);
-    });
   }
 
-  subscribeToEvent(eventId, timeout) {
+  subscribeToEvent(eventId, timeout, sportId = 0) {
     this.eventsRequester.subscribe(`${this.eventApiAddress}?id=${eventId}`, timeout);
+    this.eventsRequester.on('response', (rawEventResponse) => {
+      const parsedEventResponse = JSON.parse(rawEventResponse);
+      this.sports[sportId].events[parsedEventResponse.id] = new Event(parsedEventResponse.id, sportId);
+      this.emit('newOdds', rawEventResponse);
+    });
   }
-  unsubscribeFromEvent(eventId) {
+  unsubscribeFromEvent(eventId, sportId = 0) {
+    delete this.sports[sportId].events[eventId];
     this.eventsRequester.unsubscribe(`${this.eventApiAddress}?id=${eventId}`);
   }
-  subscribeToEvents(eventsIds = [], timeout) {
+  subscribeToEvents(eventsIds = [], timeout, sportId) {
     eventsIds.forEach((eventId) => {
-      this.subscribeToEvent(eventId, timeout);
+      this.subscribeToEvent(eventId, timeout, sportId);
     })
   }
 
-  subscribeToSport(sport, timeout) {
-    console.log(`${this.sportApiAddress}?=${sport}`);
-    this.sportsRequester.subscribe(`${this.sportApiAddress}?id=${sport}`, timeout);
+  subscribeToSport(sportId, timeout) {
+    this.sportsRequester.subscribe(`${this.sportApiAddress}?id=${sportId}`, timeout);
+    this.sportsRequester.on('response', (rawSportResponse) => {
+
+      const eventsIdsList = this.parseSport(rawSportResponse);
+      this.sports[sportId] = new Sport(sportId);
+      this.subscribeToEvents(eventsIdsList, timeout, sportId);
+    });
   }
-  unsubscribeFromSport(sport, timeout) {
+  unsubscribeFromSport(sportId, timeout) {
+    for (let eventId in this.sports[sportId].events) this.unsubscribeFromEvent(eventId, sportId);
+    delete this.sports[sportId];
     this.sportsRequester.unsubscribe(`${this.sportApiAddress}?id=${sport}`);
   }
   subscribeToSports(sports = [], timeout) {

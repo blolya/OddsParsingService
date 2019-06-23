@@ -35,21 +35,14 @@ class RequestSubscriber extends Flowable {
   }
 
   subscribe(address, timeout) {
-    const connectionKey = this.createHash(address);
-    this.connections[connectionKey] = new Requester(address, timeout);
-    this.connections[connectionKey].on('response', (data) => {
+    this.connections[address] = new Requester(address, timeout);
+    this.connections[address].on('response', (data) => {
       this.emit('response', data);
     })
   }
 
   unsubscribe(address) {
-    this.connections[this.createHash(address)].unsubscribeFromEvent();
-  }
-
-  createHash(data) {
-    return crypto.createHmac('sha256', this.salt)
-      .update(data)
-      .digest('hex');
+    this.connections[address].unsubscribeFromEvent();
   }
 }
 

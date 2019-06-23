@@ -7,7 +7,22 @@ const api = {
   sport: 'https://api.ruolimp.ru/api/live/sport'
 };
 
+class Sport {
+  constructor(id) {
+    this.id = id;
+    this.liveEvents = [];
+  }
+}
+class Event {
+  constructor(id, sportId) {
+    this.id = id;
+    this.sportId = sportId;
+  }
+}
+
 module.exports = {
+  Sport,
+  Event,
   sports,
   api
 };
