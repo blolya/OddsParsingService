@@ -1,5 +1,5 @@
 const Flowable = require('../utils/react').Flowable;
-const RequestSubscriber = require('../utils/subscriber').RequestSubscriber;
+const Requester = require('../utils/requester').Requester;
 const {Sport, Event, api} = require('./olimp');
 
 class OlimpOddsParsingService extends Flowable {
@@ -11,8 +11,8 @@ class OlimpOddsParsingService extends Flowable {
 
     this.sports = {};
 
-    this.sportsRequester = new RequestSubscriber();
-    this.eventsRequester = new RequestSubscriber();
+    this.sportsRequester = new Requester();
+    this.eventsRequester = new Requester();
   }
 
   subscribeToEvent(eventId, timeout, sportId = 0) {

@@ -31,7 +31,6 @@ class RequestSubscriber extends Flowable {
     super(props);
 
     this.connections = new Map();
-    this.salt = 'OMEGALUL';
   }
 
   subscribe(address, timeout) {
@@ -42,7 +41,7 @@ class RequestSubscriber extends Flowable {
   }
 
   unsubscribe(address) {
-    this.connections[address].unsubscribeFromEvent();
+    this.connections[address].unsubscribe();
   }
 }
 
