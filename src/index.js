@@ -1,19 +1,19 @@
 'use strict';
 
 const OlimpOddsParsingService = require('./olimp/OlimpOddsParsingService');
-const sports = require('./olimp/olimp').sports;
+const sports = require('./olimp/olimp').sportTypes;
 const RequestSubscriber = require('./utils/subscriber').RequestSubscriber;
 
 
 const main = async () => {
   const oops = new OlimpOddsParsingService();
-  oops.subscribeToSports([3], 1000);
+  oops.subscribeToSports([sports.TENNIS, sports.FOOTBALL], 1000);
   oops.on('newOdds', (odds) => {
     console.log(odds);
   });
   setTimeout(() => {
-    oops.unsubscribeFromSport(3);
-  }, 6000);
+    oops.unsubscribeFromSports([sports.TENNIS, sports.FOOTBALL]);
+  }, 3000);
 };
 
 main();
