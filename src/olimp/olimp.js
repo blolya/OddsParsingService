@@ -6,8 +6,8 @@ const sportTypes = {
   TENNIS: 3
 };
 const api = {
-  event: 'https://api.ruolimp.ru/api/live/event',
-  sport: 'https://api.ruolimp.ru/api/live/sport'
+  event: 'https://www.olimp.bet/apiru/live/event',
+  sport: 'https://www.olimp.bet/apiru/live/sport'
 };
 
 class Sport {

@@ -1,13 +1,14 @@
 const http = require('http');
 const https = require('https');
 const Flowable = require("./react").Flowable;
+const cloudscraper = require('cloudscraper');
 
 class Requester extends Flowable {
   constructor(address = '', timeout = 1000) {
     super();
 
     this.interval = setInterval(async () => {
-      this.emit('response', await fetch(address));
+      this.emit('response', await cloudscraper.get(address));
     }, timeout);
   }
   unsubscribe() {

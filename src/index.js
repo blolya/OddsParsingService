@@ -3,6 +3,7 @@
 const OlimpOddsParsingService = require('./olimp/OlimpOddsParsingService');
 const sports = require('./olimp/olimp').sportTypes;
 const RequestSubscriber = require('./utils/subscriber').RequestSubscriber;
+const cloudscraper = require('cloudscraper');
 
 
 const main = async () => {
@@ -12,8 +13,8 @@ const main = async () => {
     console.log(odds);
   });
   setTimeout(() => {
-    oops.unsubscribeFromSports([sports.TENNIS, sports.FOOTBALL]);
-  }, 3000);
+    oops.unsubscribeFromSport(sports.TENNIS);
+  }, 16000);
 };
 
 main();
