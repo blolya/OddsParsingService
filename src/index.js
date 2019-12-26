@@ -1,20 +1,16 @@
 'use strict';
 
-const OlimpOddsParsingService = require('./olimp/OlimpOddsParsingService');
-const sports = require('./olimp/olimp').sportTypes;
-const RequestSubscriber = require('./utils/subscriber').RequestSubscriber;
-const cloudscraper = require('cloudscraper');
-
+const FonbetOddsParsingService = require('./fonbet/FonbetOddsParsingService');
+const {BASKETBALL} = require('./fonbet/fonbet').sports;
+const request = require('request');
 
 const main = async () => {
-  const oops = new OlimpOddsParsingService();
-  oops.subscribeToSports([sports.TENNIS, sports.FOOTBALL], 1000);
-  oops.on('newOdds', (odds) => {
+  const fops = new FonbetOddsParsingService();
+  fops.subscribeToSports([BASKETBALL], 1000);
+  fops.on("odds", (odds) => {
     console.log(odds);
   });
-  setTimeout(() => {
-    oops.unsubscribeFromSport(sports.TENNIS);
-  }, 16000);
+
 };
 
 main();
