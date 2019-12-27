@@ -1,3 +1,11 @@
+const ScopeType = require("../odds").ScopeType;
+const BetType = require("../odds").BetType;
+const Outcome = require("../odds").Outcome;
+const HandicapSide = require("../odds").HandicapSide;
+const TotalSubject = require("../odds").TotalSubject;
+const TotalDirection = require("../odds").TotalDirection;
+
+
 const SportsDict = {
   3: "BASKETBALL"
 };
@@ -24,7 +32,6 @@ class Sport {
     this.regionId = regionId;
     this.name = name;
     this.status = status;
-    this.events = {};
   }
 }
 class Event {
@@ -42,11 +49,244 @@ class Event {
   }
 }
 
+const factors = {
+  921: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.ONE]
+    }
+  },
+  3150: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.ONE]
+    }
+  },
+  3144: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.ONE]
+    }
+  },
+  922: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.X]
+    }
+  },
+  3152: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.X]
+    }
+  },
+  923: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.TWO]
+    }
+  },
+  3151: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.TWO]
+    }
+  },
+  3145: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.TWO]
+    }
+  },
+  924: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.ONE, Outcome.X]
+    }
+  },
+  1571: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.ONE, Outcome.TWO]
+    }
+  },
+  925: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.WIN,
+      outcome: [Outcome.X, Outcome.TWO]
+    }
+  },
+  927: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.HANDICAP,
+      side: HandicapSide.TEAM1,
+      handicap: 0
+    }
+  },
+  937: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.HANDICAP,
+      side: HandicapSide.TEAM1,
+      handicap: 0
+    }
+  },
+  1845: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.HANDICAP,
+      side: HandicapSide.TEAM1,
+      handicap: 0
+    }
+  },
+  928: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.HANDICAP,
+      side: HandicapSide.TEAM2,
+      handicap: 0
+    }
+  },
+  938: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.HANDICAP,
+      side: HandicapSide.TEAM2,
+      handicap: 0
+    }
+  },
+  1846: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.HANDICAP,
+      side: HandicapSide.TEAM2,
+      handicap: 0
+    }
+  },
+  930: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.TOTAL,
+      subject: TotalSubject.ALL,
+      direction: TotalDirection.OVER,
+      total: 0
+    }
+  },
+  940: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.TOTAL,
+      subject: TotalSubject.ALL,
+      direction: TotalDirection.OVER,
+      total: 0
+    }
+  },
+  1848: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.TOTAL,
+      subject: TotalSubject.ALL,
+      direction: TotalDirection.OVER,
+      total: 0
+    }
+  },
+  931: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.TOTAL,
+      subject: TotalSubject.ALL,
+      direction: TotalDirection.UNDER,
+      total: 0
+    }
+  },
+  941: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.TOTAL,
+      subject: TotalSubject.ALL,
+      direction: TotalDirection.UNDER,
+      total: 0
+    }
+  },
+  1849: {
+    scope: {
+      type: ScopeType.MATCH
+    },
+    bet: {
+      type: BetType.TOTAL,
+      subject: TotalSubject.ALL,
+      direction: TotalDirection.UNDER,
+      total: 0
+    }
+  },
+  // 2820: c.MainRowFactorsKind.nextRound1,
+  // 2821: c.MainRowFactorsKind.nextRound2,
+  // 933: c.MainRowFactorsKind.nextRound1,
+  // 934: c.MainRowFactorsKind.nextRound2
+};
+
 module.exports = {
   Sport,
   Event,
   SportsDict,
   api,
   status,
-  sports
+  sports,
+  factors
 };

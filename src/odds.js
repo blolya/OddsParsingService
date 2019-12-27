@@ -24,9 +24,55 @@ const Sport = {
   BASKETBALL: "BASKETBALL"
 };
 
+const Outcome = {
+  ONE: "ONE",
+  TWO: "TWO",
+  X: "X"
+};
+
+const ScopeType = {
+  MATCH: "Scope.Match",
+  NUM_SETS: "Scope.NumSets",
+  SET: "Scope.Set",
+  GAME: "Scope.Game",
+  HALF: "Scope.Half",
+  QUARTER: "Scope.Quarter"
+};
+
+const BetType = {
+  WIN: "BetType.Win",
+  HANDICAP: "BetType.Handicap",
+  TOTAL: "BetType.Total",
+  PARITY: "BetType.Parity",
+  TWO_WAY: "BetType.TwoWay"
+};
+
+const HandicapSide = {
+  TEAM1: "TEAM1",
+  TEAM2: "TEAM2"
+};
+
+const TotalSubject = {
+  ALL: "ALL",
+  TEAM1: "TEAM1",
+  TEAM2: "TEAM2"
+};
+
+const TotalDirection = {
+  OVER: "OVER",
+  UNDER: "UNDER",
+  EQUAL: "EQUAL"
+};
+
 
 module.exports = {
   Factor,
   SportEvent,
-  Sport
+  Sport,
+  Outcome,
+  ScopeType,
+  BetType,
+  HandicapSide,
+  TotalSubject,
+  TotalDirection
 };
