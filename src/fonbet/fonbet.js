@@ -1,31 +1,26 @@
-const ScopeType = require("../odds").ScopeType;
-const BetType = require("../odds").BetType;
-const Outcome = require("../odds").Outcome;
-const HandicapSide = require("../odds").HandicapSide;
-const TotalSubject = require("../odds").TotalSubject;
-const TotalDirection = require("../odds").TotalDirection;
+const {Outcome, ScopeType, BetType, HandicapSide, TotalSubject, TotalDirection} = require("../odds").OddsEnums;
 
-
-const SportsDict = {
+const sportsDict = {
   3: "BASKETBALL"
 };
 
 const api = {
-  event: 'https://line32.bkfon-resource.ru/live/updatesFromVersion/3166364347/en',
-  sport: 'https://line01i.bkfon-resource.ru/live/updatesFromVersion/3166344651/en'
+  event: 'https://line32.bkfon-resource.ru/live/updatesFromVersion/3184630894/en',
+  sport: 'https://line01i.bkfon-resource.ru/live/updatesFromVersion/3184630894/en'
 };
 
-const status = {
+const Status = {
+  MAIN: "main",
   OUTDATED: "outdated",
   LIVE: "live"
 };
 
-const sports = {
+const sportsIds = {
   BASKETBALL: 3
 };
 
 class Sport {
-  constructor(id, parentId, kind, regionId, name, status = status.OUTDATED) {
+  constructor(id, parentId, kind, regionId, name, status = Status.OUTDATED) {
     this.id = id;
     this.parentId = parentId;
     this.kind = kind;
@@ -35,7 +30,7 @@ class Sport {
   }
 }
 class Event {
-  constructor(id, parentId, sportId, team1Id, team2Id, team1, team2, name, namePrefix, status = status.OUTDATED) {
+  constructor(id, parentId, sportId, team1Id, team2Id, team1, team2, name, namePrefix, status = Status.OUTDATED) {
     this.id = id;
     this.parentId = parentId;
     this.sportId = sportId;
@@ -49,7 +44,7 @@ class Event {
   }
 }
 
-const factors = {
+const factorsDict = {
   921: {
     scope: {
       type: ScopeType.MATCH
@@ -282,11 +277,11 @@ const factors = {
 };
 
 module.exports = {
-  Sport,
-  Event,
-  SportsDict,
+  FonbetSport: Sport,
+  FonbetEvent: Event,
+  fonbetSportsDict: sportsDict,
   api,
-  status,
-  sports,
-  factors
+  FonbetStatus: Status,
+  fonbetSportsIds: sportsIds,
+  fonbetFactorsDict: factorsDict
 };

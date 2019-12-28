@@ -1,18 +1,14 @@
 const Flowable = require('../utils/react').Flowable;
 const Requester = require('../utils/requester').Requester;
-const {Sport, Event, SportsDict, api, status} = require('./fonbet');
-const factors = require("./fonbet").factors;
-const odds = require('../odds');
-const BetType = require("../odds").BetType;
+
+const {FonbetSport, FonbetEvent, fonbetSportsDict, api, FonbetStatus, fonbetFactorsDict, fonbetSportsIds} = require('./fonbet');
+const {Factor, SportEvent, OddsEnums} = require("../odds");
 
 class FonbetOddsParsingService extends Flowable {
   constructor() {
     super();
 
-    this.sportApiAddress = api.sport;
-    this.eventApiAddress = api.event;
-
-    this.listenToUpdates(this.sportApiAddress);
+    this.listenToUpdates(api.sport);
 
     this.subscribedSports = {};
 
@@ -27,9 +23,11 @@ class FonbetOddsParsingService extends Flowable {
   }
 
   subscribeToSport(sport) {
-    this.subscribedSports[sport] = sport;
-    this.sports[sport] = new Sport(
-      sport, 0, "", "", SportsDict[sport], status.LIVE
+    const sportId = fonbetSportsIds[sport];
+
+    this.subscribedSports[sportId] = sportId;
+    this.sports[sportId] = new FonbetSport(
+      sport, 0, "", "", fonbetSportsDict[sportId], FonbetStatus.LIVE
     )
   }
 
@@ -45,7 +43,7 @@ class FonbetOddsParsingService extends Flowable {
 
   listenToUpdates(updatesAddress = "") {
     if(this.updatesRequester) this.updatesRequester.unsubscribe();
-    this.updatesRequester = new Requester(this.sportApiAddress, { gzip: true });
+    this.updatesRequester = new Requester(updatesAddress, { gzip: true });
 
     this.updatesRequester.on("response", (rawUpdate) => {
       const update = JSON.parse(rawUpdate);
@@ -59,7 +57,7 @@ class FonbetOddsParsingService extends Flowable {
           const odds = this.makeOdds(customFactor);
 
           if (odds) {
-            if (odds.event.sport === "BASKETBALL")
+            if (odds.event.sport === OddsEnums.Sport.BASKETBALL)
               this.emit("odds", JSON.stringify(odds));
           }
         }
@@ -67,6 +65,7 @@ class FonbetOddsParsingService extends Flowable {
       })
     })
   }
+
   stopListeningToUpdates() {
     this.updatesRequester.unsubscribe();
   }
@@ -81,21 +80,21 @@ class FonbetOddsParsingService extends Flowable {
     const firstName = event.parentId ? this.events[event.parentId].team1 : event.team1;
     const secondName = event.parentId ? this.events[event.parentId].team2 : event.team2;
 
-    const sportEvent = new odds.SportEvent(sportName, league, firstName, secondName);
+    const sportEvent = new SportEvent(sportName, league, firstName, secondName);
 
-    if (factors.hasOwnProperty(customFactor.f)) {
-      const scope = factors[customFactor.f].scope;
-      const betType = factors[customFactor.f].bet;
+    if (fonbetFactorsDict.hasOwnProperty(customFactor.f)) {
+      const scope = fonbetFactorsDict[customFactor.f].scope;
+      const betType = fonbetFactorsDict[customFactor.f].bet;
 
       switch (betType.type) {
-        case BetType.TOTAL:
+        case OddsEnums.BetType.TOTAL:
           betType.total = customFactor.pt;
           break;
-        case BetType.HANDICAP:
+        case OddsEnums.BetType.HANDICAP:
           betType.handicap = customFactor.pt;
       }
 
-      return new odds.Factor(sportEvent, scope, betType, "FONBET", customFactor.v, 0, "qwe", false);
+      return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, customFactor.v, 0, "qwe", false);
     } else {
       return null;
     }
@@ -104,39 +103,39 @@ class FonbetOddsParsingService extends Flowable {
   updateSports(sportsUpdates = {}) {
     for (let sportId in this.sports)
       if (!this.subscribedSports.hasOwnProperty(sportId))
-        this.sports[sportId].status = status.OUTDATED;
+        this.sports[sportId].status = FonbetStatus.OUTDATED;
 
     sportsUpdates.forEach( sportUpdate => {
 
       if (!this.subscribedSports.hasOwnProperty(sportUpdate.id))
-        this.sports[sportUpdate.id] = new Sport(
-          sportUpdate.id, sportUpdate.parentId ? sportUpdate.parentId : 0, sportUpdate.kind, sportUpdate.regionId, sportUpdate.name, status.LIVE
+        this.sports[sportUpdate.id] = new FonbetSport(
+          sportUpdate.id, sportUpdate.parentId ? sportUpdate.parentId : 0, sportUpdate.kind, sportUpdate.regionId, sportUpdate.name, FonbetStatus.LIVE
         );
 
     });
 
     for (let sportId in this.sports)
-      if(this.sports[sportId].status === status.OUTDATED) delete this.sports[sportId];
+      if(this.sports[sportId].status === FonbetStatus.OUTDATED) delete this.sports[sportId];
   }
 
   updateEvents(eventsUpdates = {}) {
 
-    // Set status of pre-updated events to OUTDATED
+    // Set FonbetStatus of pre-updated events to OUTDATED
     for (let eventId in this.events)
-      this.events[eventId].status = status.OUTDATED;
+      this.events[eventId].status = FonbetStatus.OUTDATED;
 
     eventsUpdates.forEach( eventUpdate => {
 
-      this.events[eventUpdate.id] = new Event(
+      this.events[eventUpdate.id] = new FonbetEvent(
         eventUpdate.id, eventUpdate.parentId ? eventUpdate.parentId : 0, eventUpdate.sportId, eventUpdate.team1Id, eventUpdate.team2Id,
-        eventUpdate.team1, eventUpdate.team2, eventUpdate.name, eventUpdate.namePrefix, status.LIVE
+        eventUpdate.team1, eventUpdate.team2, eventUpdate.name, eventUpdate.namePrefix, FonbetStatus.LIVE
       );
 
     });
 
     // Remove pre-updated events
     for (let eventId in this.events)
-      if (this.events[eventId].status === status.OUTDATED) delete this.events[eventId];
+      if (this.events[eventId].status === FonbetStatus.OUTDATED) delete this.events[eventId];
 
   }
 }

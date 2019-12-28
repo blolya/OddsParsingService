@@ -24,6 +24,12 @@ const Sport = {
   BASKETBALL: "BASKETBALL"
 };
 
+const Bookmaker = {
+  FONBET: "FONBET",
+  OLIMP: "OLIMP",
+  BET365: "BET365"
+};
+
 const Outcome = {
   ONE: "ONE",
   TWO: "TWO",
@@ -68,11 +74,14 @@ const TotalDirection = {
 module.exports = {
   Factor,
   SportEvent,
-  Sport,
-  Outcome,
-  ScopeType,
-  BetType,
-  HandicapSide,
-  TotalSubject,
-  TotalDirection
+  OddsEnums: {
+    Sport,
+    Bookmaker,
+    Outcome,
+    ScopeType,
+    BetType,
+    HandicapSide,
+    TotalSubject,
+    TotalDirection
+  }
 };
