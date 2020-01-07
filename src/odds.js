@@ -21,7 +21,9 @@ class SportEvent {
 }
 
 const Sport = {
-  BASKETBALL: "BASKETBALL"
+  FOOTBALL: "FOOTBALL",
+  BASKETBALL: "BASKETBALL",
+  TENNIS: "TENNIS"
 };
 
 const Bookmaker = {

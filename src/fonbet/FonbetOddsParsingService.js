@@ -1,7 +1,7 @@
 const Flowable = require('../utils/react').Flowable;
 const Requester = require('../utils/requester').Requester;
 
-const {FonbetSport, FonbetEvent, fonbetSportsDict, api, FonbetStatus, fonbetFactorsDict, fonbetSportsIds} = require('./fonbet');
+const {FonbetSport, FonbetEvent, fonbetSportsDict, api, FonbetStatus, fonbetFactorsDict, fonbetSports} = require('./fonbet');
 const {Factor, SportEvent, OddsEnums} = require("../odds");
 
 class FonbetOddsParsingService extends Flowable {
@@ -9,8 +9,6 @@ class FonbetOddsParsingService extends Flowable {
     super();
 
     this.listenToUpdates(api.sport);
-
-    this.subscribedSports = {};
 
     this.sports = {};
     this.events = {};
@@ -23,11 +21,9 @@ class FonbetOddsParsingService extends Flowable {
   }
 
   subscribeToSport(sport) {
-    const sportId = fonbetSportsIds[sport];
-
-    this.subscribedSports[sportId] = sportId;
+    const sportId = fonbetSports[sport].id;
     this.sports[sportId] = new FonbetSport(
-      sport, 0, "", "", fonbetSportsDict[sportId], FonbetStatus.LIVE
+      sportId, 0, "", "", sport, FonbetStatus.MAIN
     )
   }
 
@@ -38,31 +34,29 @@ class FonbetOddsParsingService extends Flowable {
   }
 
   unsubscribeFromSport(sport) {
-    delete this.sports[sport];
+    if (this.sports[fonbetSports[sport].id].status === FonbetStatus.MAIN)
+      delete this.sports[fonbetSports[sport].id];
   }
 
   listenToUpdates(updatesAddress = "") {
+    // Unscubscribe from previous Requester if it exists and create new
     if(this.updatesRequester) this.updatesRequester.unsubscribe();
     this.updatesRequester = new Requester(updatesAddress, { gzip: true });
 
-    this.updatesRequester.on("response", (rawUpdate) => {
-      const update = JSON.parse(rawUpdate);
+    this.updatesRequester.on("response", rawUpdate => this.handleUpdate( JSON.parse(rawUpdate) ))
 
-      this.updateSports(update.sports);
-      this.updateEvents(update.events);
+  }
 
-      update.customFactors.forEach( customFactor => {
+  handleUpdate(update = "") {
+    this.updateSports(update.sports);
+    this.updateEvents(update.events);
 
-        if (customFactor.isLive) {
-          const odds = this.makeOdds(customFactor);
+    update.customFactors.forEach( customFactor => {
 
-          if (odds) {
-            if (odds.event.sport === OddsEnums.Sport.BASKETBALL)
-              this.emit("odds", JSON.stringify(odds));
-          }
-        }
+      const odds = this.makeOdds(customFactor);
 
-      })
+      if (odds) this.emit("odds", JSON.stringify(odds));
+
     })
   }
 
@@ -72,50 +66,113 @@ class FonbetOddsParsingService extends Flowable {
 
   makeOdds(customFactor) {
 
+    if (!this.events.hasOwnProperty(customFactor.e))
+      throw Error(`Event ${customFactor.e} doesn't exist.`);
+
     const event = this.events[customFactor.e];
+
+    if (!this.sports.hasOwnProperty(event.sportId))
+      return null;
+
+    let mainEvent = event;
+    if (event.parentId)
+      mainEvent = this.events[event.parentId];
+    while (mainEvent.parentId)
+      mainEvent = this.events[mainEvent.parentId];
+
+    if (!this.sports.hasOwnProperty(event.sportId))
+      throw Error(`Sport ${event.sportId} doesn't exist.`);
+
     const sport = this.sports[event.sportId];
 
-    const sportName = sport.parentId ? this.sports[sport.parentId].name : sport.name;
-    const league = sport.parentId ? sport.name.substring(sport.name.indexOf(".") + 1) : "";
-    const firstName = event.parentId ? this.events[event.parentId].team1 : event.team1;
-    const secondName = event.parentId ? this.events[event.parentId].team2 : event.team2;
+    let mainSport = sport;
+    if (sport.parentId)
+      mainSport = this.sports[sport.parentId];
+    while(mainSport.parentId)
+      mainSport =  this.sports[sport.parentId];
 
-    const sportEvent = new SportEvent(sportName, league, firstName, secondName);
+    const sportEvent = new SportEvent(
+      OddsEnums.Sport[mainSport.name],
+      sport.name.substring(sport.name.indexOf(".") + 2),
+      mainEvent.team1,
+      mainEvent.team2
+    );
 
-    if (fonbetFactorsDict.hasOwnProperty(customFactor.f)) {
-      const scope = fonbetFactorsDict[customFactor.f].scope;
-      const betType = fonbetFactorsDict[customFactor.f].bet;
+    console.log(sportEvent);
 
-      switch (betType.type) {
-        case OddsEnums.BetType.TOTAL:
-          betType.total = customFactor.pt;
-          break;
-        case OddsEnums.BetType.HANDICAP:
-          betType.handicap = customFactor.pt;
-      }
 
-      return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, customFactor.v, 0, "qwe", false);
-    } else {
-      return null;
-    }
+    // if (!this.sports.hasOwnProperty(event.sportId))
+    //   return null;
+    // else {
+    //   const sport = this.sports[event.sportId];
+    //
+    //   const sportName = sport.parentId ? this.sports[sport.parentId].name : sport.name;
+    //   const league = sport.parentId ? sport.name.substring(sport.name.indexOf(".") + 2) : "";
+    //   const firstName = event.parentId ? this.events[event.parentId].team1 : event.team1;
+    //   const secondName = event.parentId ? this.events[event.parentId].team2 : event.team2;
+    //
+    //   const sportEvent = new SportEvent(sportName, league, firstName, secondName);
+    //
+    //   if (fonbetFactorsDict.hasOwnProperty(customFactor.f)) {
+    //     const scope = fonbetFactorsDict[customFactor.f].scope;
+    //     const betType = fonbetFactorsDict[customFactor.f].bet;
+    //
+    //     switch (betType.type) {
+    //       case OddsEnums.BetType.TOTAL:
+    //         betType.total = customFactor.pt;
+    //         break;
+    //       case OddsEnums.BetType.HANDICAP:
+    //         betType.handicap = customFactor.pt;
+    //     }
+    //
+    //     return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, customFactor.v, 0, "qwe", !customFactor.isLive);
+    //   } else {
+    //     return null;
+    //   }
+    // }
   }
 
   updateSports(sportsUpdates = {}) {
+
+    // Set status flag OUTDATED to every sport except subscribed ones (there are a lot of subsports with unique IDs)
     for (let sportId in this.sports)
-      if (!this.subscribedSports.hasOwnProperty(sportId))
+      if (this.sports[sportId].status !== FonbetStatus.MAIN)
         this.sports[sportId].status = FonbetStatus.OUTDATED;
 
     sportsUpdates.forEach( sportUpdate => {
-
-      if (!this.subscribedSports.hasOwnProperty(sportUpdate.id))
+      // Add a new Sport if it doesn't already exist and has its parent
+      if (!this.sports.hasOwnProperty(sportUpdate.id) && this.sports.hasOwnProperty(sportUpdate.parentId))
         this.sports[sportUpdate.id] = new FonbetSport(
-          sportUpdate.id, sportUpdate.parentId ? sportUpdate.parentId : 0, sportUpdate.kind, sportUpdate.regionId, sportUpdate.name, FonbetStatus.LIVE
+          sportUpdate.id, sportUpdate.parentId,
+          sportUpdate.kind, sportUpdate.regionId, sportUpdate.name, FonbetStatus.LIVE
         );
 
     });
 
+    // Delete OUTDATED sports
     for (let sportId in this.sports)
       if(this.sports[sportId].status === FonbetStatus.OUTDATED) delete this.sports[sportId];
+
+  }
+
+  getMainSport(sport) {
+    // if (!sport.parentId)
+    //   return sport;
+
+    let mainSport = sport;
+
+    while (mainSport.parentId)
+      mainSport = this.sports[mainSport.parentId];
+
+    return mainSport;
+  }
+  getMainEvent(event) {
+    let mainEvent = event;
+
+    while (mainEvent.parentId)
+      mainEvent = this.events[mainEvent.parentId];
+
+    return mainEvent;
   }
 
   updateEvents(eventsUpdates = {}) {
@@ -133,7 +190,7 @@ class FonbetOddsParsingService extends Flowable {
 
     });
 
-    // Remove pre-updated events
+    // Remove outdated events
     for (let eventId in this.events)
       if (this.events[eventId].status === FonbetStatus.OUTDATED) delete this.events[eventId];
 

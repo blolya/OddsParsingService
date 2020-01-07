@@ -1,7 +1,15 @@
 const {Outcome, ScopeType, BetType, HandicapSide, TotalSubject, TotalDirection} = require("../odds").OddsEnums;
+const {football, basketball, tennis} = require("./sports/sports");
 
 const sportsDict = {
-  3: "BASKETBALL"
+  1: "FOOTBALL",
+  3: "BASKETBALL",
+  4: "TENNIS"
+};
+const sports = {
+  FOOTBALL: football,
+  BASKETBALL: basketball,
+  TENNIS: tennis
 };
 
 const api = {
@@ -13,10 +21,6 @@ const Status = {
   MAIN: "main",
   OUTDATED: "outdated",
   LIVE: "live"
-};
-
-const sportsIds = {
-  BASKETBALL: 3
 };
 
 class Sport {
@@ -282,6 +286,6 @@ module.exports = {
   fonbetSportsDict: sportsDict,
   api,
   FonbetStatus: Status,
-  fonbetSportsIds: sportsIds,
+  fonbetSports: sports,
   fonbetFactorsDict: factorsDict
 };
