@@ -13,7 +13,7 @@ const sports = {
 };
 
 const api = {
-  event: 'https://line32.bkfon-resource.ru/live/updatesFromVersion/3184630894/en',
+  factors: "https://line11.bkfon-resource.ru/line/factorsCatalog/tables/?lang=en&version=0",
   sport: 'https://line01i.bkfon-resource.ru/live/updatesFromVersion/3184630894/en'
 };
 
