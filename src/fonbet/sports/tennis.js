@@ -42,11 +42,32 @@ module.exports = {
     }
 
     if (factor.info.title === "Total" || factor.info.title === "Totals") {
-
       if (factor.info.subtitle === "") {
         betType = {
           type: OddsEnums.BetType.TOTAL,
           subject: OddsEnums.TotalSubject.ALL,
+          direction: factor.info.outcome === "O" ? OddsEnums.TotalDirection.OVER : OddsEnums.TotalDirection.UNDER,
+          total: parseFloat(factor.pt)
+        }
+      }
+    }
+
+    if (factor.info.title === "Team Totals-1") {
+      if (factor.info.subtitle === "") {
+        betType = {
+          type: OddsEnums.BetType.TOTAL,
+          subject: OddsEnums.TotalSubject.TEAM1,
+          direction: factor.info.outcome === "O" ? OddsEnums.TotalDirection.OVER : OddsEnums.TotalDirection.UNDER,
+          total: parseFloat(factor.pt)
+        }
+      }
+    }
+
+    if (factor.info.title === "Team Totals-2") {
+      if (factor.info.subtitle === "") {
+        betType = {
+          type: OddsEnums.BetType.TOTAL,
+          subject: OddsEnums.TotalSubject.TEAM2,
           direction: factor.info.outcome === "O" ? OddsEnums.TotalDirection.OVER : OddsEnums.TotalDirection.UNDER,
           total: parseFloat(factor.pt)
         }
@@ -62,10 +83,10 @@ module.exports = {
         side: side,
         handicap: factor.pt
       };
-
-      // console.log(event);
-      // console.log(factor);
     }
+
+    console.log(event);
+    console.log(factor);
 
     return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, factor.v, "", "", true);
   }

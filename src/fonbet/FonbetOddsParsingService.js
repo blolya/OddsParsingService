@@ -111,6 +111,7 @@ class FonbetOddsParsingService extends Flowable {
   unsubscribeFromSport(sport) {
     if (this.subscribedSports.hasOwnProperty( fonbetSports[sport].id ))
       delete this.subscribedSports[fonbetSports[sport].id];
+
   }
 
   getTopSport(sport) {
@@ -184,5 +185,13 @@ class FonbetOddsParsingService extends Flowable {
 
   }
 }
+
+Object.prototype.isEmpty = function() {
+  for (let key in this)
+    if (this.hasOwnProperty(key))
+      return false;
+
+  return true;
+};
 
 module.exports = FonbetOddsParsingService;
