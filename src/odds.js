@@ -76,7 +76,6 @@ const TotalDirection = {
 module.exports = {
   Factor,
   SportEvent,
-  ScopeType,
   OddsEnums: {
     Sport,
     Bookmaker,
