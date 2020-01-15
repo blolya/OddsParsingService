@@ -8,6 +8,7 @@ class FonbetOddsParsingService extends Flowable {
   constructor() {
     super();
 
+    this.odds = {};
     this.factorsCatalog = {};
     this.factorsCatalogRequester = new Requester(api.factors, { gzip: true });
     this.factorsCatalogRequester.on("response", rawFactorsCatalog =>
@@ -21,16 +22,12 @@ class FonbetOddsParsingService extends Flowable {
   }
 
   handleUpdate(update) {
-
     this.updateSports(update.sports);
     this.updateEvents(update.events);
-
-    update.customFactors.forEach( customFactor => {
-      const odds = this.makeOdds(customFactor);
-      if (odds) this.emit("odds", odds);
-    })
-
+    this.updateOdds(update.customFactors);
+    this.pourOdds();
   }
+
 
   updateSports(sportsUpdates = {}) {
     this.sports = {};
@@ -64,6 +61,27 @@ class FonbetOddsParsingService extends Flowable {
 
   }
 
+  updateOdds(customFactors) {
+    // Set odds status to outdated
+    for (let oddsId in this.odds)
+      this.odds[oddsId].deleted = true;
+
+    customFactors.forEach( customFactor => {
+      const odds = this.makeOdds(customFactor);
+      if (odds) this.odds[customFactor.f] = odds;
+    });
+  }
+
+  pourOdds() {
+    for (let oddsId in this.odds) {
+      this.emit("odds", this.odds[oddsId] );
+
+      // Delete outdated odds
+      if (this.odds[oddsId].deleted === true)
+        delete this.odds[oddsId];
+    }
+  }
+
   makeOdds(customFactor) {
 
     if (!this.events.hasOwnProperty(customFactor.e))
@@ -84,7 +102,12 @@ class FonbetOddsParsingService extends Flowable {
 
     customFactor.info = this.factorsCatalog[customFactor.f];
 
-    return fonbetSports[sport.mainSportName].makeOdds(sport, event, customFactor);
+    const odds = fonbetSports[sport.mainSportName].makeOdds(sport, event, customFactor);
+
+    if (odds)
+      this.odds[customFactor.f] = odds;
+
+    return odds;
 
   }
 
@@ -136,8 +159,6 @@ class FonbetOddsParsingService extends Flowable {
 
     const groups = factorsCatalogUpdate.groups;
 
-    let mainGroup = {};
-
     groups.forEach( group => {
       group.tables.forEach( table => {
         const tableHeader = table.rows[0];
@@ -184,14 +205,7 @@ class FonbetOddsParsingService extends Flowable {
     });
 
   }
+
 }
-
-Object.prototype.isEmpty = function() {
-  for (let key in this)
-    if (this.hasOwnProperty(key))
-      return false;
-
-  return true;
-};
 
 module.exports = FonbetOddsParsingService;

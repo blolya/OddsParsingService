@@ -85,9 +85,9 @@ module.exports = {
       };
     }
 
-    console.log(event);
-    console.log(factor);
+    // if (!betType.hasOwnProperty("type"))
+    //   return null;
 
-    return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, factor.v, "", "", true);
+    return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, factor.v, new Date().getTime(), "", false);
   }
 };

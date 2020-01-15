@@ -8,8 +8,7 @@ const main = async () => {
   const fops = new FonbetOddsParsingService();
   fops.subscribeToSports([Sport.TENNIS], 1000);
   fops.on("odds", (odds) => {
-    // if (odds.betType.type)
-    //   console.log( JSON.stringify(odds));
+      console.log( JSON.stringify(odds) );
   });
 
 };
