@@ -5,6 +5,7 @@ module.exports = {
   id: 4,
   makeOdds: (sport, event, factor) => {
 
+
     const sportEvent = new SportEvent(
       OddsEnums.Sport[sport.mainSportName],
       sport.name.substring(sport.name.indexOf(".") + 2),
@@ -16,8 +17,9 @@ module.exports = {
       type: OddsEnums.ScopeType.MATCH
     };
 
+
     let set = 0;
-    if(event.name !== "") {
+    if (event.name !== "") {
       const setNameMatches = event.name.match(/(\d)(st|nd|rd)\sset/mi);
       if (setNameMatches) {
         set = setNameMatches[1];
@@ -85,9 +87,35 @@ module.exports = {
       };
     }
 
-    // if (!betType.hasOwnProperty("type"))
-    //   return null;
+    if (factor.info.title === "Games" && factor.info.subtitle === "Game %P") {
+      const outcome =
+        factor.info.outcome === "%1" ? OddsEnums.Outcome.ONE :
+        factor.info.outcome === "%2" ? OddsEnums.Outcome.TWO : "";
 
-    return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, factor.v, new Date().getTime(), "", false);
+      scope = {
+        type: OddsEnums.ScopeType.GAME,
+        set: set,
+        game: parseInt(factor.pt)
+      };
+      betType = {
+        type: OddsEnums.BetType.WIN,
+        outcome: [outcome]
+      };
+    }
+
+    if (factor.info.title === "Games special") {
+      scope = {
+        type: OddsEnums.ScopeType.GAME,
+        set: set,
+        game: parseInt(factor.pt)
+      };
+      betType = {
+        type: OddsEnums.BetType.TWO_WAY,
+        subject: factor.info.subtitle.replace("%P", factor.pt),
+        result: factor.info.outcome === "yes"
+      }
+    }
+
+    return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, factor.v, new Date().getTime(), event.id, false);
   }
 };

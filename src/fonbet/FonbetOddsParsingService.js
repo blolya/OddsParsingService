@@ -63,12 +63,14 @@ class FonbetOddsParsingService extends Flowable {
 
   updateOdds(customFactors) {
     // Set odds status to outdated
-    for (let oddsId in this.odds)
+    for (let oddsId in this.odds) {
       this.odds[oddsId].deleted = true;
+    }
 
     customFactors.forEach( customFactor => {
       const odds = this.makeOdds(customFactor);
-      if (odds) this.odds[customFactor.f] = odds;
+
+      if (odds) this.odds["" + customFactor.e + customFactor.f] = odds;
     });
   }
 
@@ -89,6 +91,7 @@ class FonbetOddsParsingService extends Flowable {
 
     const event = this.events[customFactor.e];
     const mainEvent = this.getTopEvent(event);
+
     event.team1Id = mainEvent.team1Id;
     event.team2Id = mainEvent.team2Id;
     event.team1 = mainEvent.team1;
@@ -102,12 +105,7 @@ class FonbetOddsParsingService extends Flowable {
 
     customFactor.info = this.factorsCatalog[customFactor.f];
 
-    const odds = fonbetSports[sport.mainSportName].makeOdds(sport, event, customFactor);
-
-    if (odds)
-      this.odds[customFactor.f] = odds;
-
-    return odds;
+    return fonbetSports[sport.mainSportName].makeOdds(sport, event, customFactor);
 
   }
 
