@@ -116,6 +116,6 @@ module.exports = {
       }
     }
 
-    return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, factor.v, new Date().getTime(), event.id, false);
+    return new Factor(sportEvent, scope, betType, OddsEnums.Bookmaker.FONBET, factor.v, new Date().getTime(), event.parentId ? event.parentId : event.id, false);
   }
 };
